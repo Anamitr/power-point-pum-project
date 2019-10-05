@@ -3,6 +3,10 @@ import os
 
 import cv2
 
+BASE_PATH = './db/'
+BASE_IMAGE_EXTENSION = '.jpg'
+TYPES_OF_GESTURES = ['close', 'left', 'open', 'play', 'right']
+
 
 def rename_files():
     path = "db"
@@ -20,8 +24,8 @@ def rename_files():
             i = i + 1
 
 
-def generate_black_and_white():
-    image = cv2.imread('./db/open/2.jpg')
+def get_black_and_white_hand(img_path):
+    image = cv2.imread(img_path)
     h1_mask = get_image_mask(image)
 
     contours, hierarchy = cv2.findContours(h1_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
@@ -32,11 +36,14 @@ def generate_black_and_white():
 
     h1_contours = np.copy(image)
 
-    cv2.drawContours(h1_contours, new_contours, -1, (0, 0, 255), 20, hierarchy=hierarchy, maxLevel=0)
+    black_and_white_img = np.zeros_like(h1_contours)
 
-    show_image(h1_contours)
+    # cv2.drawContours(h1_contours, new_contours, -1, (0, 0, 255), 20, hierarchy=hierarchy, maxLevel=0)
+    cv2.drawContours(black_and_white_img, new_contours, 0, (255, 255, 255), -1)
 
-    return
+    show_image(black_and_white_img)
+
+    return black_and_white_img
 
     # Cropping image
     ret, thresh = cv2.threshold(h1_mask, 127, 255, 0)
@@ -153,6 +160,29 @@ def crop_minAreaRect(img, rect):
     # crop
     return img_rot[pts[1][1]:pts[0][1],
            pts[1][0]:pts[2][0]]
+
+
+def check_cv_matching_shapes():
+    # TODO: put data in dictionary
+    img_typed_resources = dict
+
+    for gesture_type in TYPES_OF_GESTURES:
+        images = []
+        for r, d, f in os.walk(BASE_PATH + gesture_type):
+            for file in f:
+                images.append(int(file.replace(BASE_IMAGE_EXTENSION, '')))
+
+        images.sort()
+        img_typed_resources[gesture_type] = images
+        # print(gesture_type + ': ', images)
+    print(img_typed_resources)
+    return
+
+    img_file_name = BASE_PATH + img_file_name + BASE_IMAGE_EXTENSION
+    im = cv2.imread(img_file_name, cv2.IMREAD_GRAYSCALE)
+
+    show_image(im)
+    _, im = cv2.threshold(im, 128, 255, cv2.THRESH_BINARY)
 
 
 def show_image(image):
