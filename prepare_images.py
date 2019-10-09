@@ -1,3 +1,5 @@
+import random
+
 import numpy as np
 import os
 
@@ -24,51 +26,6 @@ def rename_files():
             i = i + 1
 
 
-def get_black_and_white_hand(img_path):
-    image = cv2.imread(img_path)
-    h1_mask = get_image_mask(image)
-
-    contours, hierarchy = cv2.findContours(h1_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
-    # [print(len(contour)) for contour in contours]
-    longest_contour = get_longest_contour(contours)
-    print(len(longest_contour))
-    new_contours = [longest_contour]
-
-    h1_contours = np.copy(image)
-
-    black_and_white_img = np.zeros_like(h1_contours)
-
-    # cv2.drawContours(h1_contours, new_contours, -1, (0, 0, 255), 20, hierarchy=hierarchy, maxLevel=0)
-    cv2.drawContours(black_and_white_img, new_contours, 0, (255, 255, 255), -1)
-
-    show_image(black_and_white_img)
-
-    return black_and_white_img
-
-    # Cropping image
-    ret, thresh = cv2.threshold(h1_mask, 127, 255, 0)
-    contours, hierarchy = cv2.findContours(thresh, 1, 2)
-    cnt = contours[0]
-    moments = cv2.moments(cnt)
-    print(len(contours))
-
-    cv2.drawContours(h1_mask, contours, -1, (0, 255, 0), 3)
-    show_image(h1_mask)
-
-    print('image: ' + str(type(h1)) + ', h1_mask: ' + str(type(h1_mask)))
-
-    # im = h1_mask.clone()
-
-    rect = cv2.minAreaRect(cnt)
-    box = cv2.boxPoints(rect)
-    box = np.int0(box)
-    h1 = cv2.drawContours(h1, [box], 0, (0, 0, 255), 2)
-
-    # image = crop_minAreaRect(h1, rect)
-
-    show_image(h1)
-
-
 def get_longest_contour(contours):
     max_length = -1
     longest_contour = None
@@ -77,20 +34,6 @@ def get_longest_contour(contours):
             longest_contour = contour
             max_length = len(contour)
     return longest_contour
-
-
-def get_image_mask(h1):
-    # zmiana przestrzeni kolorów z BGR do HSV
-    h1_hsv = cv2.cvtColor(h1, cv2.COLOR_BGR2HSV)
-
-    # określenie zakresu kolorów, które nas interesują (w przestrzeni HSV)
-    lower = np.array([40, 40, 40])
-    upper = np.array([70, 255, 255])
-
-    # Progowanie obrazu za pomocą zdefiniowanych zakresów
-    h1_mask = cv2.inRange(h1_hsv, lower, upper)
-    # show_image(h1_mask)
-    return h1_mask
 
 
 def test():
@@ -162,9 +105,51 @@ def crop_minAreaRect(img, rect):
            pts[1][0]:pts[2][0]]
 
 
+def get_image_mask(h1):
+    # zmiana przestrzeni kolorów z BGR do HSV
+    h1_hsv = cv2.cvtColor(h1, cv2.COLOR_BGR2HSV)
+
+    # określenie zakresu kolorów, które nas interesują (w przestrzeni HSV)
+    lower = np.array([40, 40, 40])
+    upper = np.array([70, 255, 255])
+
+    # Progowanie obrazu za pomocą zdefiniowanych zakresów
+    h1_mask = cv2.inRange(h1_hsv, lower, upper)
+    # show_image(h1_mask)
+    return h1_mask
+
+
+def get_black_and_white_hand(img_path):
+    image = cv2.imread(img_path)
+    # show_image(image)
+    h1_mask = get_image_mask(image)
+    # show_image(h1_mask)
+
+    contours, hierarchy = cv2.findContours(h1_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
+    # [print(len(contour)) for contour in contours]
+    longest_contour = get_longest_contour(contours)
+    # print(len(longest_contour))
+    new_contours = [longest_contour]
+
+    h1_contours = np.copy(image)
+
+    black_and_white_img = np.zeros_like(h1_contours)
+
+    # cv2.drawContours(h1_contours, new_contours, -1, (0, 0, 255), 20, hierarchy=hierarchy, maxLevel=0)
+    cv2.drawContours(black_and_white_img, new_contours, 0, (255, 255, 255), -1)
+
+    # show_image(black_and_white_img)
+
+    # to have single channel image, as required by function matchShapes
+    black_and_white_img = cv2.cvtColor(black_and_white_img, cv2.COLOR_BGR2GRAY)
+    # show_image(gray)
+
+    return black_and_white_img
+
+
 def check_cv_matching_shapes():
     # TODO: put data in dictionary
-    img_typed_resources = dict
+    img_typed_resources = dict()
 
     for gesture_type in TYPES_OF_GESTURES:
         images = []
@@ -176,6 +161,38 @@ def check_cv_matching_shapes():
         img_typed_resources[gesture_type] = images
         # print(gesture_type + ': ', images)
     print(img_typed_resources)
+
+    black_and_white_images = dict()
+    img_distances = dict()
+    counter = 0
+    for key in img_typed_resources.keys():
+        images = []
+        for img_num in img_typed_resources[key]:
+            black_and_white_hand = get_black_and_white_hand(get_img_path_from_img_type_and_num(key, img_num))
+
+            images.append(black_and_white_hand)
+            # if counter == 4:
+            #     break
+        black_and_white_images[key] = images
+        distances = []
+
+        for i in range(2, len(black_and_white_images[key])):
+            distances.append(
+                cv2.matchShapes(black_and_white_images[key][0], black_and_white_images[key][i], cv2.CONTOURS_MATCH_I2,
+                                0),
+            )
+
+        print(distances)
+        # break  # delete when you want to iterate over all gesture types
+
+    return black_and_white_images
+
+    for i in range(1, 5):
+        print("Rand dist:" + str(cv2.matchShapes(black_and_white_images['close'][random.randint(0, 10)],
+                                             black_and_white_images['left'][random.randint(0, 10)],
+                                             cv2.CONTOURS_MATCH_I2,
+                                             0)))
+
     return
 
     img_file_name = BASE_PATH + img_file_name + BASE_IMAGE_EXTENSION
@@ -189,3 +206,7 @@ def show_image(image):
     cv2.imshow("hand1", cv2.resize(image, (300, 400)))
     cv2.waitKey(0)
     cv2.destroyAllWindows()
+
+
+def get_img_path_from_img_type_and_num(type, num):
+    return BASE_PATH + str(type) + '/' + str(num) + BASE_IMAGE_EXTENSION
