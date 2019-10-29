@@ -1,3 +1,5 @@
+import random
+
 import numpy as np
 import os
 
@@ -22,7 +24,6 @@ def rename_files():
             dst = folder + '\\' + str(i) + '.jpg'
             os.rename(src, dst)
             i = i + 1
-
 
 def get_black_and_white_hand_from_path(img_path):
     image = cv2.imread(img_path)
@@ -58,20 +59,6 @@ def get_longest_contour(contours):
             longest_contour = contour
             max_length = len(contour)
     return longest_contour
-
-
-def get_image_mask(h1):
-    # zmiana przestrzeni kolorów z BGR do HSV
-    h1_hsv = cv2.cvtColor(h1, cv2.COLOR_BGR2HSV)
-
-    # określenie zakresu kolorów, które nas interesują (w przestrzeni HSV)
-    lower = np.array([40, 40, 40])
-    upper = np.array([70, 255, 255])
-
-    # Progowanie obrazu za pomocą zdefiniowanych zakresów
-    h1_mask = cv2.inRange(h1_hsv, lower, upper)
-    # show_image(h1_mask)
-    return h1_mask
 
 
 def test():
@@ -143,9 +130,23 @@ def crop_minAreaRect(img, rect):
            pts[1][0]:pts[2][0]]
 
 
+def get_image_mask(h1):
+    # zmiana przestrzeni kolorów z BGR do HSV
+    h1_hsv = cv2.cvtColor(h1, cv2.COLOR_BGR2HSV)
+
+    # określenie zakresu kolorów, które nas interesują (w przestrzeni HSV)
+    lower = np.array([40, 40, 40])
+    upper = np.array([70, 255, 255])
+
+    # Progowanie obrazu za pomocą zdefiniowanych zakresów
+    h1_mask = cv2.inRange(h1_hsv, lower, upper)
+    # show_image(h1_mask)
+    return h1_mask
+
+
 def check_cv_matching_shapes():
     # TODO: put data in dictionary
-    img_typed_resources = dict
+    img_typed_resources = dict()
 
     for gesture_type in TYPES_OF_GESTURES:
         images = []
@@ -157,6 +158,38 @@ def check_cv_matching_shapes():
         img_typed_resources[gesture_type] = images
         # print(gesture_type + ': ', images)
     print(img_typed_resources)
+
+    black_and_white_images = dict()
+    img_distances = dict()
+    counter = 0
+    for key in img_typed_resources.keys():
+        images = []
+        for img_num in img_typed_resources[key]:
+            black_and_white_hand = get_black_and_white_hand(get_img_path_from_img_type_and_num(key, img_num))
+
+            images.append(black_and_white_hand)
+            # if counter == 4:
+            #     break
+        black_and_white_images[key] = images
+        distances = []
+
+        for i in range(2, len(black_and_white_images[key])):
+            distances.append(
+                cv2.matchShapes(black_and_white_images[key][0], black_and_white_images[key][i], cv2.CONTOURS_MATCH_I2,
+                                0),
+            )
+
+        print(distances)
+        # break  # delete when you want to iterate over all gesture types
+
+    return black_and_white_images
+
+    for i in range(1, 5):
+        print("Rand dist:" + str(cv2.matchShapes(black_and_white_images['close'][random.randint(0, 10)],
+                                             black_and_white_images['left'][random.randint(0, 10)],
+                                             cv2.CONTOURS_MATCH_I2,
+                                             0)))
+
     return
 
     img_file_name = BASE_PATH + img_file_name + BASE_IMAGE_EXTENSION
@@ -170,3 +203,7 @@ def show_image(image):
     cv2.imshow("hand1", cv2.resize(image, (300, 400)))
     cv2.waitKey(0)
     cv2.destroyAllWindows()
+
+
+def get_img_path_from_img_type_and_num(type, num):
+    return BASE_PATH + str(type) + '/' + str(num) + BASE_IMAGE_EXTENSION
