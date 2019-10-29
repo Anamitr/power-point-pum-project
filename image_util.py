@@ -24,14 +24,18 @@ def rename_files():
             i = i + 1
 
 
-def get_black_and_white_hand(img_path):
+def get_black_and_white_hand_from_path(img_path):
     image = cv2.imread(img_path)
+    return get_black_and_white_hand(image)
+
+
+def get_black_and_white_hand(image):
     h1_mask = get_image_mask(image)
 
     contours, hierarchy = cv2.findContours(h1_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
     # [print(len(contour)) for contour in contours]
     longest_contour = get_longest_contour(contours)
-    print(len(longest_contour))
+    # print(len(longest_contour))
     new_contours = [longest_contour]
 
     h1_contours = np.copy(image)
@@ -44,29 +48,6 @@ def get_black_and_white_hand(img_path):
     show_image(black_and_white_img)
 
     return black_and_white_img
-
-    # Cropping image
-    ret, thresh = cv2.threshold(h1_mask, 127, 255, 0)
-    contours, hierarchy = cv2.findContours(thresh, 1, 2)
-    cnt = contours[0]
-    moments = cv2.moments(cnt)
-    print(len(contours))
-
-    cv2.drawContours(h1_mask, contours, -1, (0, 255, 0), 3)
-    show_image(h1_mask)
-
-    print('image: ' + str(type(h1)) + ', h1_mask: ' + str(type(h1_mask)))
-
-    # im = h1_mask.clone()
-
-    rect = cv2.minAreaRect(cnt)
-    box = cv2.boxPoints(rect)
-    box = np.int0(box)
-    h1 = cv2.drawContours(h1, [box], 0, (0, 0, 255), 2)
-
-    # image = crop_minAreaRect(h1, rect)
-
-    show_image(h1)
 
 
 def get_longest_contour(contours):
