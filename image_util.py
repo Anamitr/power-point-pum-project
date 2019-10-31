@@ -1,7 +1,7 @@
-import numpy as np
 import os
 
 import cv2
+import numpy as np
 
 BASE_PATH = './db2/'
 BASE_IMAGE_EXTENSION = '.jpg'
@@ -107,6 +107,19 @@ def get_typed_image_names():
         # print(gesture_type + ': ', images)
     # print(img_typed_resources)
     return img_typed_resources
+
+
+def get_hu_moments():
+    black_and_white_images = get_black_and_white_images()
+    hu_moments_list = []
+    labels = []
+    for key in black_and_white_images.keys():
+        for image in black_and_white_images[key]:
+            hu_moments = cv2.HuMoments(cv2.moments(image))
+            hu_moments_list.append(hu_moments)
+            labels.append(key)
+
+    return np.array(hu_moments_list), np.array(labels)
 
 
 def show_image(image):
