@@ -5,7 +5,7 @@ import os
 
 import cv2
 
-BASE_PATH = './db/'
+BASE_PATH = './db2/'
 BASE_IMAGE_EXTENSION = '.jpg'
 TYPES_OF_GESTURES = ['close', 'left', 'open', 'play', 'right']
 
@@ -24,6 +24,7 @@ def rename_files():
             dst = folder + '\\' + str(i) + '.jpg'
             os.rename(src, dst)
             i = i + 1
+
 
 def get_black_and_white_hand_from_path(img_path):
     image = cv2.imread(img_path)
@@ -173,24 +174,28 @@ def check_cv_matching_shapes():
             # if counter == 4:
             #     break
         black_and_white_images[key] = images
-        distances = []
 
-        for i in range(2, len(black_and_white_images[key])):
+    for key in black_and_white_images.keys():
+        distances = []
+        for i in range(1, len(black_and_white_images[key])):
             distances.append(
                 cv2.matchShapes(black_and_white_images[key][0], black_and_white_images[key][i], cv2.CONTOURS_MATCH_I2,
                                 0),
             )
+        print(key, ':', distances)
 
-        print(distances)
-        # break  # delete when you want to iterate over all gesture types
+    print(
+        cv2.matchShapes(black_and_white_images['left'][0], black_and_white_images['open'][0], cv2.CONTOURS_MATCH_I2, 0))
+    print(
+        cv2.matchShapes(black_and_white_images['play'][0], black_and_white_images['open'][0], cv2.CONTOURS_MATCH_I2, 0))
 
     return black_and_white_images
 
     for i in range(1, 5):
         print("Rand dist:" + str(cv2.matchShapes(black_and_white_images['close'][random.randint(0, 10)],
-                                             black_and_white_images['left'][random.randint(0, 10)],
-                                             cv2.CONTOURS_MATCH_I2,
-                                             0)))
+                                                 black_and_white_images['left'][random.randint(0, 10)],
+                                                 cv2.CONTOURS_MATCH_I2,
+                                                 0)))
 
     return
 
