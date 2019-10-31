@@ -46,7 +46,9 @@ def get_black_and_white_hand(image):
     # cv2.drawContours(h1_contours, new_contours, -1, (0, 0, 255), 20, hierarchy=hierarchy, maxLevel=0)
     cv2.drawContours(black_and_white_img, new_contours, 0, (255, 255, 255), -1)
 
-    show_image(black_and_white_img)
+    # to have single channel image, as required by function matchShapes
+    black_and_white_img = cv2.cvtColor(black_and_white_img, cv2.COLOR_BGR2GRAY)
+    # show_image(black_and_white_img)
 
     return black_and_white_img
 
@@ -165,7 +167,7 @@ def check_cv_matching_shapes():
     for key in img_typed_resources.keys():
         images = []
         for img_num in img_typed_resources[key]:
-            black_and_white_hand = get_black_and_white_hand(get_img_path_from_img_type_and_num(key, img_num))
+            black_and_white_hand = get_black_and_white_hand_from_path(get_img_path_from_img_type_and_num(key, img_num))
 
             images.append(black_and_white_hand)
             # if counter == 4:
