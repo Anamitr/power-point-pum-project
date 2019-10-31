@@ -39,7 +39,7 @@ def test_hu_moments():
     num_of_same_type_to_print = 2
     for key in black_and_white_images.keys():
         print(key)
-        for i in range(0, 2):
+        for i in range(0, num_of_same_type_to_print):
             moments = cv2.moments(black_and_white_images[key][i])
             hu_moments = cv2.HuMoments(moments)
             print(hu_moments)
