@@ -3,9 +3,7 @@ import os
 import cv2
 import numpy as np
 
-BASE_PATH = './db2/'
-BASE_IMAGE_EXTENSION = '.jpg'
-TYPES_OF_GESTURES = ['close', 'left', 'open', 'play', 'right']
+from constants import BASE_PATH, BASE_IMAGE_EXTENSION, TYPES_OF_GESTURES
 
 
 def rename_files():
@@ -111,15 +109,32 @@ def get_typed_image_names():
 
 def get_hu_moments():
     black_and_white_images = get_black_and_white_images()
-    hu_moments_list = []
+    # num_of_images = len(black_and_white_images)
+    num_of_hu_moments = 7
+
+    # hu_moments_list = np.zeros([count_len_of_images_dict(images_dict=black_and_white_images), num_of_hu_moments], float)
+    hu_moments_list = np.empty((0, num_of_hu_moments), float)
+    # hu_moments_list = []
     labels = []
     for key in black_and_white_images.keys():
+        # print(key)
         for image in black_and_white_images[key]:
             hu_moments = cv2.HuMoments(cv2.moments(image))
-            hu_moments_list.append(hu_moments)
+            # print(hu_moments)
+            hu_moments_list = np.append(hu_moments_list, hu_moments.T, axis=0)
+            # hu_moments_list.append(hu_moments.tolist())
             labels.append(key)
 
-    return np.array(hu_moments_list), np.array(labels)
+    return hu_moments_list, np.array(labels).T
+    # return np.array(hu_moments_list), np.array(labels).T
+
+
+def count_len_of_images_dict(images_dict):
+    c = 0
+    for key in images_dict.keys():
+        for item in images_dict[key]:
+            c += 1
+    return c
 
 
 def show_image(image):
