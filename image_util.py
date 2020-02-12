@@ -2,6 +2,8 @@ import os
 
 import cv2
 import numpy as np
+from itertools import chain
+import math
 
 from constants import BASE_PATH, BASE_IMAGE_EXTENSION, TYPES_OF_GESTURES
 
@@ -129,6 +131,59 @@ def get_hu_moments():
     # return np.array(hu_moments_list), np.array(labels).T
 
 
+def get_featues_and_labels():
+    black_and_white_images = get_black_and_white_images()
+    # num_of_images = len(black_and_white_images)
+    num_of_hu_moments = 7
+
+    # hu_moments_list = np.zeros([count_len_of_images_dict(images_dict=black_and_white_images), num_of_hu_moments], float)
+    # hu_moments_list = np.empty((0, num_of_hu_moments), float)
+    # hu_moments_list = []
+    features = []
+    labels = []
+    for key in black_and_white_images.keys():
+        # print(key)
+        for image in black_and_white_images[key]:
+            # hu_moments = cv2.HuMoments(cv2.moments(image))
+            # print(hu_moments)
+            # hu_moments_list = np.append(hu_moments_list, hu_moments.T, axis=0)
+            # hu_moments_list.append(hu_moments.tolist())
+            features.append(get_features_for_one_image(image))
+            labels.append(key)
+
+    return features, np.array(labels).T
+    # return np.array(hu_moments_list), np.array(labels).T
+
+
+def get_features_for_one_image(img):
+    contours = cv2.findContours(img, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)[0]
+    c_area = np.array([cv2.contourArea(c[-1]) for c in contours])
+    c_len = np.array([cv2.arcLength(c[-1], True) for c in contours])
+    Moments = cv2.moments(img)
+    HuMoments = cv2.HuMoments(Moments)
+    centres = (Moments["m10"] / Moments["m00"], Moments["m01"] / Moments["m00"])
+    Moments = np.array(Moments.values())
+    HuMoments = np.array(list(chain.from_iterable(HuMoments)))
+    HuMoments = np.array([-math.log(abs(hu)) for hu in HuMoments])
+    centres = np.array(centres)
+    metadata = np.hstack((c_area, c_len))
+    metadata2 = np.concatenate((metadata, centres, Moments, HuMoments), axis=1)
+    return metadata2
+
+
+def get_all_images_and_their_labels():
+    black_and_white_images = get_black_and_white_images()
+    all_images = []
+    labels = []
+
+    for key in black_and_white_images.keys():
+        # print(key)
+        for image in black_and_white_images[key]:
+            all_images.append(image)
+            labels.append(key)
+    return all_images, labels
+
+
 def count_len_of_images_dict(images_dict):
     c = 0
     for key in images_dict.keys():
@@ -159,3 +214,19 @@ def extract_folder_to_black_and_white(path: str):
         black_and_white_image = get_black_and_white_hand(cv2.imread(full_path))
         # image_util.show_image(black_and_white_image)
         cv2.imwrite(os.path.join(path, 'black_and_white', file_name), black_and_white_image)
+
+
+def getFeatures(data):
+    contours = [cv2.findContours(img, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)[0] for img in data]
+    c_area = np.array([cv2.contourArea(c[-1]) for c in contours])
+    c_len = np.array([cv2.arcLength(c[-1], True) for c in contours])
+    Moments = [cv2.moments(img) for img in data]
+    HuMoments = [cv2.HuMoments(mom) for mom in Moments]
+    centres = [(M["m10"] / M["m00"], M["m01"] / M["m00"]) for M in Moments]
+    Moments = np.array([list(moment.values()) for moment in Moments])
+    HuMoments = np.array([list(chain.from_iterable(moment)) for moment in HuMoments])
+    HuMoments = np.array([[-math.log(abs(hu)) for hu in moment] for moment in HuMoments])
+    centres = np.array(centres)
+    metadata = np.vstack((c_area, c_len)).T
+    metadata2 = np.concatenate((metadata, centres, Moments, HuMoments), axis=1)
+    return metadata2
