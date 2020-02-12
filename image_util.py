@@ -139,12 +139,23 @@ def count_len_of_images_dict(images_dict):
 
 def show_image(image):
     try:
-        cv2.imshow("hand1", cv2.resize(image, (300, 400)))
+        cv2.imshow("hand1", cv2.resize(image, (700, 400)))
         cv2.waitKey(0)
         cv2.destroyAllWindows()
-    except cv2.error:
-        print("Not able to show image!")
+    except cv2.error as exception:
+        print("Not able to show image! Exception:", exception)
 
 
 def get_img_path_from_img_type_and_num(type, num):
     return BASE_PATH + str(type) + '/' + str(num) + BASE_IMAGE_EXTENSION
+
+
+def extract_folder_to_black_and_white(path: str):
+    for file_name in os.listdir(path):
+        full_path = os.path.join(path, file_name)
+        if os.path.isdir(full_path):
+            continue
+        print(file_name)
+        black_and_white_image = get_black_and_white_hand(cv2.imread(full_path))
+        # image_util.show_image(black_and_white_image)
+        cv2.imwrite(os.path.join(path, 'black_and_white', file_name), black_and_white_image)
