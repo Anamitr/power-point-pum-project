@@ -14,5 +14,17 @@ def train_model(x, y):
     predicted_groups = classifier.predict(X_test)
     print(predicted_groups)
     print(y_test)
+    print('Accuracy:', calculate_score(predicted_groups, y_test), '%')
     pass
 
+
+def calculate_score(predicted, actual):
+    if len(predicted) != len(actual):
+        print("calculate_score: length of arguments must be even!")
+        return
+    else:
+        same = 0
+        for i in range(len(predicted)):
+            if predicted[i] == actual[i]:
+                same += 1
+        return same / len(predicted) * 100
