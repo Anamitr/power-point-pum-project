@@ -3,11 +3,11 @@ import image_util
 
 
 def start_camera():
-    camera = cv2.VideoCapture('https://10.187.162.29:8080/video')
+    camera = cv2.VideoCapture('http://0.0.0.0:4747/mjpegfeed')
 
     while True:
         (grabbed, frame) = camera.read()
-        image_util.show_image(frame)
+        # image_util.show_image(frame)
 
         black_and_white_img = None
         try:
@@ -20,3 +20,6 @@ def start_camera():
             moments = cv2.moments(black_and_white_img)
             hu_moments = cv2.HuMoments(moments)
             print(hu_moments)
+
+
+start_camera()
