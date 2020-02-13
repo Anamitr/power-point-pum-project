@@ -1,3 +1,5 @@
+import pickle
+
 import numpy as np
 from sklearn.decomposition import PCA
 from sklearn.metrics import confusion_matrix, accuracy_score
@@ -41,6 +43,12 @@ def train_model_JN(x, y):
     print(accuracy_score(y_tst, Z, normalize=True))
 
 
+def get_normalized_features(features):
+    mean = np.mean(features, axis=0)
+    std = np.std(features, axis=0)
+    return normalize(features, mean, std)
+
+
 def normalize(data, mean, std):
     return (data - mean) / std
 
@@ -55,3 +63,13 @@ def calculate_score(predicted, actual):
             if predicted[i] == actual[i]:
                 same += 1
         return same / len(predicted) * 100
+
+
+def save_model(save_name: str, model):
+    with open(save_name, 'wb') as fid:
+        pickle.dump(model, fid)
+
+
+def open_model(save_name: str):
+    with open(save_name, 'rb') as fid:
+        return pickle.load(fid)
