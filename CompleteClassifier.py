@@ -1,5 +1,5 @@
 from sklearn.decomposition import PCA
-from sklearn.svm import LinearSVC
+from sklearn.svm import LinearSVC, SVC
 import numpy as np
 
 import image_util
@@ -7,7 +7,7 @@ import recognition_util
 
 
 class CompleteClassifier:
-    classifier: LinearSVC = None
+    classifier: SVC = None
     pca: PCA = None
     mean: np.ndarray = None
     std: np.ndarray = None
@@ -19,7 +19,12 @@ class CompleteClassifier:
         self.std = std
 
     def predict_one_image(self, image):
-        features_normalized = recognition_util.normalize(image_util.getFeatures([image]), self.mean,
-                                                         self.std)
-        features_pca = self.pca.transform(features_normalized)
+        features_pca = self.get_features_pca(image)
         return self.classifier.predict(features_pca)
+
+    def get_predict_proba_of_image(self, image):
+        features_pca = self.get_features_pca(image)
+        return self.classifier.predict_proba(features_pca)
+
+    def get_features_pca(self, image):
+        return self.pca.transform(recognition_util.normalize(image_util.getFeatures([image]), self.mean, self.std))

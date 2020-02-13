@@ -9,8 +9,9 @@ import image_util
 import recognition_util
 from CompleteClassifier import CompleteClassifier
 from constants import PROJECT_NAME
+import constants
 
-complete_classifier: CompleteClassifier = recognition_util.open_model('trained_models/complete_classifier_1')
+complete_classifier: CompleteClassifier = recognition_util.open_model('trained_models/complete_classifier_2')
 
 
 def start_camera():
@@ -20,17 +21,30 @@ def start_camera():
         (grabbed, frame) = camera.read()
         cv2.imshow(PROJECT_NAME, frame)
 
-        if cv2.waitKey(1) & 0xFF == ord(' '):
-            black_and_white_image = image_util.get_black_and_white_hand(frame)
-            cv2.imwrite(os.path.join('temp', "temp.jpg"), black_and_white_image)
+        black_and_white_image = image_util.get_black_and_white_hand(frame)
 
+        if check_if_applies_to_threshold(black_and_white_image):
+            print("Applies to threshold")
             print("predicted:", complete_classifier.predict_one_image(black_and_white_image))
+
+        # print("predicted:", complete_classifier.predict_one_image(black_and_white_image))
+        # print("proba:", complete_classifier.get_predict_proba_of_image(black_and_white_image)[0])
+        # print("applies:", check_if_applies_to_threshold(black_and_white_image))
+
+        if cv2.waitKey(1) & 0xFF == ord(' '):
+            cv2.imwrite(os.path.join('temp', "temp.jpg"), black_and_white_image)
+            print("predicted:", complete_classifier.predict_one_image(black_and_white_image))
+            print("proba:", complete_classifier.get_predict_proba_of_image(black_and_white_image)[0])
+            print("applies:", check_if_applies_to_threshold(black_and_white_image))
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
     cv2.destroyAllWindows()
 
+def check_if_applies_to_threshold(black_and_white_image):
+    return True in [item > constants.CLASSIFICATION_PROBABILITY_THRESHOLD for item in
+             complete_classifier.get_predict_proba_of_image(black_and_white_image)[0]]
 
 # Main script
 start_camera()

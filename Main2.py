@@ -29,7 +29,7 @@ features_pca = pca.fit_transform(features_normalized)
 print(pca.explained_variance_ratio_)
 
 x_tr, x_tst, y_tr, y_tst = train_test_split(features_pca, labels, test_size=0.3)
-model_SVC = SVC(kernel='linear')
+model_SVC = SVC(kernel='linear', probability=True)
 model_SVC.fit(x_tr, y_tr)
 Z = model_SVC.predict(x_tst)
 print(confusion_matrix(y_tst, Z))
