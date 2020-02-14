@@ -23,9 +23,12 @@ def start_camera():
 
         black_and_white_image = image_util.get_black_and_white_hand(frame)
 
-        if check_if_applies_to_threshold(black_and_white_image):
-            print("Applies to threshold")
-            print("predicted:", complete_classifier.predict_one_image(black_and_white_image))
+        try:
+            if check_if_applies_to_threshold(black_and_white_image):
+                print("Applies to threshold", complete_classifier.predict_one_image(black_and_white_image), ', ',
+                      complete_classifier.get_predict_proba_of_image(black_and_white_image)[0])
+        except ValueError as valueError:
+            print('ValueError', valueError)
 
         # print("predicted:", complete_classifier.predict_one_image(black_and_white_image))
         # print("proba:", complete_classifier.get_predict_proba_of_image(black_and_white_image)[0])
@@ -42,9 +45,11 @@ def start_camera():
 
     cv2.destroyAllWindows()
 
+
 def check_if_applies_to_threshold(black_and_white_image):
     return True in [item > constants.CLASSIFICATION_PROBABILITY_THRESHOLD for item in
-             complete_classifier.get_predict_proba_of_image(black_and_white_image)[0]]
+                    complete_classifier.get_predict_proba_of_image(black_and_white_image)[0]]
+
 
 # Main script
 start_camera()
