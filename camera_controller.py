@@ -28,11 +28,12 @@ def start_camera():
         try:
             if check_if_applies_to_threshold(black_and_white_image):
                 predicted_sign = complete_classifier.predict_one_image(black_and_white_image)[0]
-                print("Applies to threshold", predicted_sign, ', ',
-                      complete_classifier.get_predict_proba_of_image(black_and_white_image)[0])
+                # print("Applies to threshold", predicted_sign, ', ',
+                #       complete_classifier.get_predict_proba_of_image(black_and_white_image)[0])
                 occured_sign_list.append(predicted_sign)
                 if len(occured_sign_list) >= constants.SIGN_REPETITION_THRESHOLD:
                     if len(set(occured_sign_list)) == 1:
+                        print('Applying move', predicted_sign)
                         perform_action(predicted_sign)
                         occured_sign_list.clear()
                     else:
@@ -71,6 +72,9 @@ def perform_action(action: str):
     elif action == 'right':
         keyboard.press(Key.left)
         keyboard.release(Key.left)
+    elif action == 'play':
+        keyboard.press('k')
+        keyboard.release('k')
     else:
         print('Unrecognized action:', action)
 
