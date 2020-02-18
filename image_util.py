@@ -100,7 +100,10 @@ def get_typed_image_names():
         images = []
         for r, d, f in os.walk(BASE_PATH + gesture_type):
             for file in f:
-                images.append(int(file.replace(BASE_IMAGE_EXTENSION, '')))
+                if BASE_IMAGE_EXTENSION not in file:
+                    continue
+                else:
+                    images.append(int(file.replace(BASE_IMAGE_EXTENSION, '')))
 
         images.sort()
         img_typed_resources[gesture_type] = images
@@ -209,6 +212,8 @@ def extract_folder_to_black_and_white(path: str):
     for file_name in os.listdir(path):
         full_path = os.path.join(path, file_name)
         if os.path.isdir(full_path):
+            continue
+        elif '.jpg' not in file_name:
             continue
         print(file_name)
         black_and_white_image = get_black_and_white_hand(cv2.imread(full_path))

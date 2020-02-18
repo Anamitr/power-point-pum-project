@@ -13,6 +13,9 @@ from CompleteClassifier import CompleteClassifier
 
 print("Running Main2.py")
 
+# once for each sign
+# image_util.extract_folder_to_black_and_white(***)
+
 # classic
 images, labels = image_util.get_all_images_and_their_labels()
 features = image_util.getFeatures(images)

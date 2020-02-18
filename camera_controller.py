@@ -4,6 +4,7 @@ import cv2
 from sklearn.decomposition import PCA
 from sklearn.svm import LinearSVC
 from pynput.keyboard import Key, Controller
+from subprocess import call
 
 import constants
 import image_util
@@ -12,8 +13,12 @@ from CompleteClassifier import CompleteClassifier
 from constants import PROJECT_NAME
 import constants
 
-complete_classifier: CompleteClassifier = recognition_util.open_model('trained_models/complete_classifier_2')
+SHOULD_ACTUALLY_PERFORM_ACTIONS = True
+
+complete_classifier: CompleteClassifier = recognition_util.open_model('trained_models/complete_classifier_5')
 keyboard = Controller()
+volume = 50
+
 
 def start_camera():
     camera = cv2.VideoCapture('http://0.0.0.0:4747/mjpegfeed')
@@ -34,7 +39,8 @@ def start_camera():
                 if len(occured_sign_list) >= constants.SIGN_REPETITION_THRESHOLD:
                     if len(set(occured_sign_list)) == 1:
                         print('Applying move', predicted_sign)
-                        perform_action(predicted_sign)
+                        if SHOULD_ACTUALLY_PERFORM_ACTIONS:
+                            perform_action(predicted_sign)
                         occured_sign_list.clear()
                     else:
                         occured_sign_list.pop(0)
@@ -75,8 +81,39 @@ def perform_action(action: str):
     elif action == 'play':
         keyboard.press('k')
         keyboard.release('k')
+    elif action == 'volume_up':
+        raise_volume()
+        # keyboard.press(Key.media_volume_up)
+        pass
+    elif action == 'volume_down':
+        lower_volume()
+        # keyboard.press(Key.media_volume_down)
     else:
         print('Unrecognized action:', action)
+
+
+def lower_volume():
+    global volume
+    if volume > 4:
+        volume = volume - 5
+        set_volume(volume)
+
+
+def raise_volume():
+    global volume
+    if volume < 96:
+        volume = volume + 5
+        set_volume(volume)
+
+
+def set_volume(volume):
+    try:
+        if (volume <= 100) and (volume >= 0):
+            call(["amixer", "-D", "pulse", "sset", "Master", str(volume) + "%"])
+            valid = True
+
+    except ValueError as error:
+        print(error)
 
 
 # Main script
