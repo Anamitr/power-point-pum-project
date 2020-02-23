@@ -1,6 +1,7 @@
 import os
 
 import cv2
+import imutils
 import numpy as np
 from itertools import chain
 import math
@@ -235,3 +236,33 @@ def getFeatures(data):
     metadata = np.vstack((c_area, c_len)).T
     metadata2 = np.concatenate((metadata, centres, Moments, HuMoments), axis=1)
     return metadata2
+
+
+def get_farther_left_point_on_baw_img(baw_img):
+    image = baw_img
+
+    thresh = cv2.threshold(baw_img, 45, 255, cv2.THRESH_BINARY)[1]
+    thresh = cv2.erode(thresh, None, iterations=2)
+    thresh = cv2.dilate(thresh, None, iterations=2)
+
+    cnts = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL,
+                            cv2.CHAIN_APPROX_SIMPLE)
+    cnts = imutils.grab_contours(cnts)
+    c = max(cnts, key=cv2.contourArea)
+
+    extLeft = tuple(c[c[:, :, 0].argmin()][0])
+    extRight = tuple(c[c[:, :, 0].argmax()][0])
+    extTop = tuple(c[c[:, :, 1].argmin()][0])
+    extBot = tuple(c[c[:, :, 1].argmax()][0])
+
+    cv2.drawContours(baw_img, [c], -1, (0, 255, 255), 2)
+    cv2.circle(image, extLeft, 8, (0, 0, 255), -1)
+    cv2.circle(image, extRight, 8, (0, 255, 0), -1)
+    cv2.circle(image, extTop, 8, (255, 0, 0), -1)
+    cv2.circle(image, extBot, 8, (255, 255, 0), -1)
+
+    # print(extLeft, extRight, extTop, extBot)
+
+    img_shape = image.shape
+
+    return extRight[0] / img_shape[1], extRight[1] / img_shape[0]
