@@ -35,5 +35,5 @@ def take_photos(save_path: str):
 
 
 db_path = "db3"
-sign_path = "volume_down"
+sign_path = "volume_down2"
 take_photos(db_path + "/" + sign_path + "/")

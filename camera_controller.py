@@ -13,9 +13,9 @@ from CompleteClassifier import CompleteClassifier
 from constants import PROJECT_NAME
 import constants
 
-SHOULD_ACTUALLY_PERFORM_ACTIONS = True
+SHOULD_ACTUALLY_PERFORM_ACTIONS = False
 
-complete_classifier: CompleteClassifier = recognition_util.open_model('trained_models/complete_classifier_5')
+complete_classifier: CompleteClassifier = recognition_util.open_model('trained_models/complete_classifier_6')
 keyboard = Controller()
 volume = 50
 
@@ -78,14 +78,14 @@ def perform_action(action: str):
     elif action == 'right':
         keyboard.press(Key.left)
         keyboard.release(Key.left)
-    elif action == 'play':
+    elif action == 'play2':
         keyboard.press('k')
         keyboard.release('k')
     elif action == 'volume_up':
         raise_volume()
         # keyboard.press(Key.media_volume_up)
         pass
-    elif action == 'volume_down':
+    elif action == 'volume_down2':
         lower_volume()
         # keyboard.press(Key.media_volume_down)
     else:
