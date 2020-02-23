@@ -27,4 +27,4 @@ class CompleteClassifier:
         return self.classifier.predict_proba(features_pca)
 
     def get_features_pca(self, image):
-        return self.pca.transform(recognition_util.normalize(image_util.getFeatures([image]), self.mean, self.std))
+        return self.pca.transform(recognition_util.normalize(image_util.get_features([image]), self.mean, self.std))

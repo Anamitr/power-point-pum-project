@@ -222,7 +222,7 @@ def extract_folder_to_black_and_white(path: str):
         cv2.imwrite(os.path.join(path, 'black_and_white', file_name), black_and_white_image)
 
 
-def getFeatures(data):
+def get_features(data):
     contours = [cv2.findContours(img, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)[0] for img in data]
     c_area = np.array([cv2.contourArea(c[-1]) for c in contours])
     c_len = np.array([cv2.arcLength(c[-1], True) for c in contours])

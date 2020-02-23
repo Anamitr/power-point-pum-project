@@ -25,24 +25,6 @@ def train_model_with_knn(x, y):
     pass
 
 
-def train_model_JN(x, y):
-    features = x
-    mean = np.mean(features, axis=0)
-    std = np.std(features, axis=0)
-    features = normalize(features, mean, std)
-
-    pca = PCA(n_components=0.95)
-    features = pca.fit_transform(features)
-    print(pca.explained_variance_ratio_)
-
-    x_tr, x_tst, y_tr, y_tst = train_test_split(features, y, test_size=0.3)
-    model_SVC = SVC(kernel='linear')
-    model_SVC.fit(x_tr, y_tr)
-    Z = model_SVC.predict(x_tst)
-    print(confusion_matrix(y_tst, Z))
-    print(accuracy_score(y_tst, Z, normalize=True))
-
-
 def get_normalized_features(features):
     mean = np.mean(features, axis=0)
     std = np.std(features, axis=0)

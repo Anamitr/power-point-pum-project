@@ -18,7 +18,7 @@ print("Running Main2.py")
 
 # classic
 images, labels = image_util.get_all_images_and_their_labels()
-features = image_util.getFeatures(images)
+features = image_util.get_features(images)
 # recognition_util.train_model_JN(features, labels)
 
 # working
