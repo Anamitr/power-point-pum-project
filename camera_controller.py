@@ -4,6 +4,7 @@ import cv2
 from sklearn.decomposition import PCA
 from sklearn.svm import LinearSVC
 from pynput.keyboard import Key, Controller
+import pynput
 from subprocess import call
 
 import constants
@@ -15,9 +16,11 @@ import constants
 
 SHOULD_ACTUALLY_PERFORM_ACTIONS = True
 
-complete_classifier: CompleteClassifier = recognition_util.open_model('trained_models/complete_classifier_7')
+complete_classifier: CompleteClassifier = recognition_util.open_model('trained_models/complete_classifier_8')
 keyboard = Controller()
+mouse = pynput.mouse.Controller()
 volume = 50
+pointer_on = False
 
 
 def start_camera():
@@ -36,6 +39,9 @@ def start_camera():
                 # print("Applies to threshold", predicted_sign, ', ',
                 #       complete_classifier.get_predict_proba_of_image(black_and_white_image)[0])
                 occured_sign_list.append(predicted_sign)
+                if len(occured_sign_list) >= constants.POINTER_SIGN_REPETITION_THRESHOLD:
+                    if len(set(occured_sign_list)) == 1 and predicted_sign == 'pointer2':
+                        handle_pointer(black_and_white_image)
                 if len(occured_sign_list) >= constants.SIGN_REPETITION_THRESHOLD:
                     if len(set(occured_sign_list)) == 1:
                         print('Applying move', predicted_sign)
@@ -71,6 +77,12 @@ def check_if_applies_to_threshold(black_and_white_image):
 
 
 def perform_action(action: str):
+    global pointer_on
+    if action != 'pointer2' and pointer_on is True:
+        keyboard.press('l')
+        keyboard.release('l')
+        pointer_on = False
+
     print('Performing action', action)
     if action == 'left':
         keyboard.press(Key.right)
@@ -88,8 +100,26 @@ def perform_action(action: str):
     elif action == 'volume_down2':
         lower_volume()
         # keyboard.press(Key.media_volume_down)
+    elif action == 'pointer2':
+        pass
     else:
         print('Unrecognized action:', action)
+
+
+def handle_pointer(baw_image):
+    global pointer_on
+    if pointer_on is False:
+        keyboard.press('l')
+        keyboard.release('l')
+        pointer_on = True
+    relative_point = image_util.get_farther_left_point_on_baw_img(baw_image)
+    x = relative_point[0]
+    x = (x - 0.5) * 2
+    y = relative_point[1]
+    y = (y - 0.5) * 2
+    mouse.position = (constants.MIN_X + (x * constants.SCREEN_WIDTH),
+                      constants.MIN_Y + (y * constants.SCREEN_HEIGHT))
+    pass
 
 
 def lower_volume():
