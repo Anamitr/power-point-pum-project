@@ -13,9 +13,9 @@ from CompleteClassifier import CompleteClassifier
 from constants import PROJECT_NAME
 import constants
 
-SHOULD_ACTUALLY_PERFORM_ACTIONS = False
+SHOULD_ACTUALLY_PERFORM_ACTIONS = True
 
-complete_classifier: CompleteClassifier = recognition_util.open_model('trained_models/complete_classifier_6')
+complete_classifier: CompleteClassifier = recognition_util.open_model('trained_models/complete_classifier_7')
 keyboard = Controller()
 volume = 50
 
